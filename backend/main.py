@@ -112,5 +112,5 @@ async def delete_distribution_point(point_id: str):
     return {"message": f"Point {point_id} deleted successfully"}
 
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
