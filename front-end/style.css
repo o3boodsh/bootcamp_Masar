@@ -1,0 +1,325 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f0f2f5;
+    --white: #ffffff;
+    --teal: #1a6b74;
+    --teal-light: #e6f4f5;
+    --btn-blue: #1b5fa8;
+    --btn-blue-hover: #154d8a;
+    --text-dark: #1a1a2e;
+    --text-mid: #4a5568;
+    --text-light: #a0aec0;
+    --border: #dce3ec;
+    --accent-pink: #e91e8c;
+    --input-bg: #f8fafc;
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+    --radius: 10px;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Navbar ── */
+nav {
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--teal);
+    letter-spacing: -0.5px;
+}
+
+.nav-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--teal);
+    border-bottom: 2.5px solid var(--teal);
+    padding-bottom: 2px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-mid);
+    transition: background 0.2s;
+}
+
+.nav-icon:hover {
+    background: var(--teal-light);
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a6b74, #1b5fa8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ── Main ── */
+main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+}
+
+.card {
+    background: var(--white);
+    border: 1px solid ;
+    border-radius: 14px;
+    padding: 36px 40px 40px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: var(--shadow);
+}
+
+.card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+}
+
+.card-sub {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    margin-bottom: 28px;
+    line-height: 1.5;
+}
+
+/* ── Form ── */
+.field {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 7px;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    height: 44px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--input-bg);
+    padding: 0 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+input[type="text"]::placeholder {
+    color: var(--text-light);
+}
+
+input[type="text"]:focus,
+select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(26, 107, 116, 0.12);
+}
+
+/* Address field with icon */
+.input-icon-wrap {
+    position: relative;
+}
+
+.input-icon-wrap input {
+    padding-left: 38px;
+}
+
+.input-icon-wrap .icon-left {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    pointer-events: none;
+}
+
+/* Select wrapper */
+.select-wrap {
+    position: relative;
+}
+
+.select-wrap select {
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.select-wrap .chevron {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-mid);
+}
+
+/* Area select with location pin */
+.select-icon-wrap {
+    position: relative;
+}
+
+.select-icon-wrap select {
+    padding-left: 36px;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.select-icon-wrap .pin-left {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-mid);
+}
+
+.select-icon-wrap .chevron {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-mid);
+}
+
+/* ── Button ── */
+.btn-add {
+    width: 100%;
+    height: 48px;
+    background: var(--btn-blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(27, 95, 168, 0.25);
+}
+
+.btn-add:hover {
+    background: var(--btn-blue-hover);
+    box-shadow: 0 4px 16px rgba(27, 95, 168, 0.3);
+}
+
+.btn-add:active {
+    transform: scale(0.98);
+}
+
+/* ── Footer ── */
+footer {
+    background: var(--white);
+    border-top: 1px solid ;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.footer-brand {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-mid);
+    text-transform: uppercase;
+}
+
+.footer-copy {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    margin-top: 2px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 20px;
+}
+
+.footer-links a {
+    font-size: 0.75rem;
+    color: var(--text-mid);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: var(--teal);
+}
+
+/* SVG icons inline */
+svg {
+    display: inline-block;
+    vertical-align: middle;
+}
