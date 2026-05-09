@@ -1,23 +1,26 @@
-from fastapi import FastAPI
+import httpx
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
 from datetime import datetime
 import uvicorn
 
-app = FastAPI(title="AidFlow API", version="1.0.0")
+app = FastAPI(title="AidFlow API", version="2.0.0")
 
-# Allow frontend to communicate with the API
 app.add_middleware(
     CORSMiddleware,
-    # In production, replace with your frontend domain
-    allow_origins=["*"],  
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Models
+# ── Firebase Config ──
+FIREBASE_URL = "https://bootcamp-a37b4-default-rtdb.firebaseio.com"
+COLLECTION = "distribution_points"
+
+
+# ── Models ──
 class DistributionPoint(BaseModel):
     point_name: str
     type: str
@@ -26,39 +29,88 @@ class DistributionPoint(BaseModel):
     address: str
     status: str
 
-class DistributionPointResponse(DistributionPoint):
-    id: int
-    created_at: str
 
-# In-memory storage (replace with a real DB in production)
-distribution_points: List[DistributionPointResponse] = []
-counter = {"id": 1}
+class DistributionPointUpdate(BaseModel):
+    point_name: str | None = None
+    type: str | None = None
+    area: str | None = None
+    organization: str | None = None
+    address: str | None = None
+    status: str | None = None
 
-# Routes
+
+# ── Helper ──
+def fb_url(path: str = "") -> str:
+    return f"{FIREBASE_URL}/{COLLECTION}{path}.json"
+
+
+# ── Routes ──
 @app.get("/")
 def root():
-    return {"message": "AidFlow API is running"}
+    return {"message": "AidFlow API v2 – Firebase connected"}
 
-@app.post("/api/distribution-points", response_model=DistributionPointResponse, status_code=201)
-def add_distribution_point(point: DistributionPoint):
-    new_point = DistributionPointResponse(
-        id=counter["id"],
-        created_at=datetime.utcnow().isoformat(),
-        **point.model_dump()
-    )
-    distribution_points.append(new_point)
-    counter["id"] += 1
-    return new_point
 
-@app.get("/api/distribution-points", response_model=List[DistributionPointResponse])
-def get_distribution_points():
-    return distribution_points
+# CREATE
+@app.post("/api/distribution-points", status_code=201)
+async def add_distribution_point(point: DistributionPoint):
+    payload = {
+        **point.model_dump(),
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    async with httpx.AsyncClient() as client:
+        res = await client.post(fb_url(), json=payload)
+    if res.status_code != 200:
+        raise HTTPException(status_code=502, detail="Firebase write failed")
+    firebase_id = res.json().get("name")  # Firebase returns {"name": "-NxABC..."}
+    return {"id": firebase_id, **payload}
 
+
+# READ ALL
+@app.get("/api/distribution-points")
+async def get_distribution_points():
+    async with httpx.AsyncClient() as client:
+        res = await client.get(fb_url())
+    if res.status_code != 200:
+        raise HTTPException(status_code=502, detail="Firebase read failed")
+    data = res.json()
+    if not data:
+        return []
+    return [{"id": k, **v} for k, v in data.items()]
+
+
+# READ ONE
+@app.get("/api/distribution-points/{point_id}")
+async def get_distribution_point(point_id: str):
+    async with httpx.AsyncClient() as client:
+        res = await client.get(fb_url(f"/{point_id}"))
+    if res.status_code != 200 or res.json() is None:
+        raise HTTPException(status_code=404, detail="Point not found")
+    return {"id": point_id, **res.json()}
+
+
+# UPDATE (PATCH – partial update)
+@app.patch("/api/distribution-points/{point_id}")
+async def update_distribution_point(point_id: str, updates: DistributionPointUpdate):
+    payload = {k: v for k, v in updates.model_dump().items() if v is not None}
+    if not payload:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    payload["updated_at"] = datetime.utcnow().isoformat()
+    async with httpx.AsyncClient() as client:
+        res = await client.patch(fb_url(f"/{point_id}"), json=payload)
+    if res.status_code != 200:
+        raise HTTPException(status_code=502, detail="Firebase update failed")
+    return {"id": point_id, **res.json()}
+
+
+# DELETE
 @app.delete("/api/distribution-points/{point_id}")
-def delete_distribution_point(point_id: int):
-    global distribution_points
-    distribution_points = [p for p in distribution_points if p.id != point_id]
-    return {"message": f"Point {point_id} deleted"}
+async def delete_distribution_point(point_id: str):
+    async with httpx.AsyncClient() as client:
+        res = await client.delete(fb_url(f"/{point_id}"))
+    if res.status_code != 200:
+        raise HTTPException(status_code=502, detail="Firebase delete failed")
+    return {"message": f"Point {point_id} deleted successfully"}
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
