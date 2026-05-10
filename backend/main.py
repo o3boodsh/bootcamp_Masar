@@ -53,16 +53,29 @@ def root():
 # CREATE
 @app.post("/api/distribution-points", status_code=201)
 async def add_distribution_point(point: DistributionPoint):
-    payload = {
-        **point.model_dump(),
-        "created_at": datetime.utcnow().isoformat(),
-    }
     async with httpx.AsyncClient() as client:
-        res = await client.post(fb_url(), json=payload)
-    if res.status_code != 200:
-        raise HTTPException(status_code=502, detail="Firebase write failed")
-    firebase_id = res.json().get("name")  # Firebase returns {"name": "-NxABC..."}
-    return {"id": firebase_id, **payload}
+        # 1. Get current counter from Firebase
+        counter_res = await client.get(f"{FIREBASE_URL}/counter.json")
+        current_id = counter_res.json() or 0
+        new_id = current_id + 1
+
+        # 2. Save the new point with the sequential ID
+        payload = {
+            "id": new_id,
+            **point.model_dump(),
+            "created_at": datetime.utcnow().isoformat(),
+        }
+        write_res = await client.put(
+            f"{FIREBASE_URL}/{COLLECTION}/{new_id}.json",
+            json=payload
+        )
+        if write_res.status_code != 200:
+            raise HTTPException(status_code=502, detail="Firebase write failed")
+
+        # 3. Update the counter
+        await client.put(f"{FIREBASE_URL}/counter.json", json=new_id)
+
+    return payload
 
 
 # READ ALL
@@ -111,6 +124,5 @@ async def delete_distribution_point(point_id: str):
         raise HTTPException(status_code=502, detail="Firebase delete failed")
     return {"message": f"Point {point_id} deleted successfully"}
 
-
-# if __name__ == "__main__":
-#     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
