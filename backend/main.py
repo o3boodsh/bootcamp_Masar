@@ -88,7 +88,10 @@ async def get_distribution_points():
     data = res.json()
     if not data:
         return []
-    return [{"id": k, **v} for k, v in data.items()]
+    # Firebase returns a list when keys are integers, dict otherwise
+    if isinstance(data, list):
+        return [v for v in data if v is not None]
+    return list(data.values())
 
 
 # READ ONE
