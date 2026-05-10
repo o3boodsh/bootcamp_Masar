@@ -78,6 +78,16 @@ async def add_distribution_point(point: DistributionPoint):
     return payload
 
 
+# GET COUNTER
+@app.get("/api/counter")
+async def get_counter():
+    async with httpx.AsyncClient() as client:
+        res = await client.get(f"{FIREBASE_URL}/counter.json")
+    if res.status_code != 200:
+        raise HTTPException(status_code=502, detail="Firebase read failed")
+    return {"counter": res.json() or 0}
+
+
 # READ ALL
 @app.get("/api/distribution-points")
 async def get_distribution_points():
