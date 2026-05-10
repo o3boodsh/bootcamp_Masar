@@ -10,7 +10,7 @@ app = FastAPI(title="AidFlow API", version="2.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -123,6 +123,7 @@ async def delete_distribution_point(point_id: str):
     if res.status_code != 200:
         raise HTTPException(status_code=502, detail="Firebase delete failed")
     return {"message": f"Point {point_id} deleted successfully"}
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
